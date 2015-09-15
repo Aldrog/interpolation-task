@@ -1,7 +1,6 @@
+import math
 import strutils
-import sdl, graphics, colors
-import functions
-import interpolation
+import functions, interpolation, plotter
 
 const 
     a = -1.0
@@ -14,81 +13,190 @@ proc eqnodes(n: int): seq[float] =
     for i in 0..n-1:
         result[i] = a + i.float * (b - a) / (n.float - 1)
 
+proc optimalnodes(n: int): seq[float] = 
+    result.newSeq(n)
+    for i in 0..n-1:
+        result[i] = 0.5 * ((b - a) * cos(PI * (2 * i + 1).float/(2 * n).float) + (b + a))
+
 proc values(f: proc(x: float): float, 
             x: varargs[float]): seq[float] = 
     result.newSeq(x.len)
     for i in low(x)..high(x):
         result[i] = f(x[i])
 
+#
+# f1
+#
+
 # n1 equidistant nodes
-let 
-    inodes1x = eqnodes(n1)
-    inodes1y = f1.values(inodes1x)
+var 
+    inodesx = eqnodes(n1)
+    inodesy = f1.values(inodesx)
 
 # Write table of nodes
 stdout.write("|")
-for p in inodes1x:
-    stdout.write (p.formatFloat(precision = 2), "\t|")
+for p in inodesx:
+    let tab = p.formatFloat(precision = 2).len < 7
+    stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
 stdout.write("\n|")
-for p in inodes1y:
-    stdout.write(p.formatFloat(precision = 4), "\t|")
+for p in inodesy:
+    let tab = p.formatFloat(precision = 4).len < 7
+    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
 stdout.write("\n\n")
 
-let res1 = interpolate(inodes1x, inodes1y)
+let f1reseqn1 = interpolate(inodesx, inodesy)
+
+# n1 optimal nodes
+inodesx = optimalnodes(n1)
+inodesy = f1.values(inodesx)
+
+# Write table of nodes
+stdout.write("|")
+for p in inodesx:
+    let tab = p.formatFloat(precision = 2).len < 7
+    stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
+stdout.write("\n|")
+for p in inodesy:
+    let tab = p.formatFloat(precision = 4).len < 7
+    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+stdout.write("\n\n")
+
+let f1resoptn1 = interpolate(inodesx, inodesy)
+
+# Plot a graph
+var set1: seq[proc(x: float): float]
+set1.newSeq(3)
+set1[0] = f1
+set1[1] = f1reseqn1
+set1[2] = f1resoptn1
+plot(set1)
 
 # n2 equidistant nodes
-let 
-    inodes2x = eqnodes(n2)
-    inodes2y = f1.values(inodes2x)
+inodesx = eqnodes(n2)
+inodesy = f1.values(inodesx)
 
 # Write table of nodes
 stdout.write("|")
-for p in inodes2x:
-    stdout.write (p.formatFloat(precision = 2), "\t|")
+for p in inodesx:
+    let tab = p.formatFloat(precision = 2).len < 7
+    stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
 stdout.write("\n|")
-for p in inodes2y:
-    stdout.write(p.formatFloat(precision = 4), "\t|")
+for p in inodesy:
+    let tab = p.formatFloat(precision = 4).len < 7
+    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
 stdout.write("\n\n")
 
-let res2 = interpolate(inodes2x, inodes2y)
+let f1reseqn2 = interpolate(inodesx, inodesy)
+
+# n2 optimal nodes
+inodesx = optimalnodes(n2)
+inodesy = f1.values(inodesx)
+
+# Write table of nodes
+stdout.write("|")
+for p in inodesx:
+    let tab = p.formatFloat(precision = 2).len < 7
+    stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
+stdout.write("\n|")
+for p in inodesy:
+    let tab = p.formatFloat(precision = 4).len < 7
+    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+stdout.write("\n\n")
+
+let f1resoptn2 = interpolate(inodesx, inodesy)
+
+# Plot a graph
+var set2: seq[proc(x: float): float]
+set2.newSeq(3)
+set2[0] = f1
+set2[1] = f1reseqn2
+set2[2] = f1resoptn2
+plot(set2)
 
 #
-# Graphics
+# f2
 #
-const
-    width = 600
-    height = 800
-var surf = newScreenSurface(width, height)
-surf.fillSurface(colWhite)
 
-const
-    xoffset = 1.0
-    yoffset = -1.0
-    pointsForPlotting = 600
+# n1 equidistant nodes
+inodesx = eqnodes(n1)
+inodesy = f2.values(inodesx)
 
-let
-    checkPoints = eqnodes(pointsForPlotting)
-    scale = (width / (checkPoints[checkPoints.high] - checkPoints[checkPoints.low])).float
-    f1Vals = f1.values(checkPoints)
-    res1Vals = res1.values(checkPoints)
-    res2Vals = res2.values(checkPoints)
+# Write table of nodes
+stdout.write("|")
+for p in inodesx:
+    let tab = p.formatFloat(precision = 2).len < 7
+    stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
+stdout.write("\n|")
+for p in inodesy:
+    let tab = p.formatFloat(precision = 4).len < 7
+    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+stdout.write("\n\n")
 
-proc convertCoords(x, y: float): TPoint = 
-    result.x = ((x + xoffset) * scale).int
-    result.y = (-(y + yoffset) * scale + height).int
+let f2reseqn1 = interpolate(inodesx, inodesy)
 
-# Axis
-surf.drawLine(((xoffset * scale).int, 0), ((xoffset * scale).int, height), colDarkGray)
-surf.drawLine((0, (-yoffset * scale + height).int), (width, (-yoffset * scale + height).int), colDarkGray)
+# n1 optimal nodes
+inodesx = optimalnodes(n1)
+inodesy = f2.values(inodesx)
 
-for i in 1..pointsForPlotting-1:
-    surf.drawLine(convertCoords(checkPoints[i-1], f1Vals[i-1]), convertCoords(checkPoints[i], f1Vals[i]), colBlue)
-    surf.drawLine(convertCoords(checkPoints[i-1], res1Vals[i-1]), convertCoords(checkPoints[i], res1Vals[i]), colRed)
-    surf.drawLine(convertCoords(checkPoints[i-1], res2Vals[i-1]), convertCoords(checkPoints[i], res2Vals[i]), colGreen)
+# Write table of nodes
+stdout.write("|")
+for p in inodesx:
+    let tab = p.formatFloat(precision = 2).len < 7
+    stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
+stdout.write("\n|")
+for p in inodesy:
+    let tab = p.formatFloat(precision = 4).len < 7
+    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+stdout.write("\n\n")
 
-withEvents(surf, event):
-    var eventp = addr(event)
-    if event.kind == sdl.QUITEV:
-        break
-    sdl.updateRect(surf.s, 0, 0, width, height)
-    
+let f2resoptn1 = interpolate(inodesx, inodesy)
+
+# Plot a graph
+var set3: seq[proc(x: float): float]
+set3.newSeq(3)
+set3[0] = f2
+set3[1] = f2reseqn1
+set3[2] = f2resoptn1
+plot(set3)
+
+# n2 equidistant nodes
+inodesx = eqnodes(n2)
+inodesy = f2.values(inodesx)
+
+# Write table of nodes
+stdout.write("|")
+for p in inodesx:
+    let tab = p.formatFloat(precision = 2).len < 7
+    stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
+stdout.write("\n|")
+for p in inodesy:
+    let tab = p.formatFloat(precision = 4).len < 7
+    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+stdout.write("\n\n")
+
+let f2reseqn2 = interpolate(inodesx, inodesy)
+
+# n2 optimal nodes
+inodesx = optimalnodes(n2)
+inodesy = f2.values(inodesx)
+
+# Write table of nodes
+stdout.write("|")
+for p in inodesx:
+    let tab = p.formatFloat(precision = 2).len < 7
+    stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
+stdout.write("\n|")
+for p in inodesy:
+    let tab = p.formatFloat(precision = 4).len < 7
+    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+stdout.write("\n\n")
+
+let f2resoptn2 = interpolate(inodesx, inodesy)
+
+# Plot a graph
+var set4: seq[proc(x: float): float]
+set4.newSeq(3)
+set4[0] = f2
+set4[1] = f2reseqn2
+set4[2] = f2resoptn2
+plot(set4)
