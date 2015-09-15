@@ -6,10 +6,13 @@ import interpolation
 const 
     a = -1.0
     b = 1.0
-    n1 = 5
-    n2 = 15
-    randomPoints1 = @[-1.0, -0.5, 0.0, 0.5, 1.0]
-    randomPoints2 = @[-1.0, -0.86, -0.71, -0.57, -0.43, -0.28, -0.14, 0.0, 0.14, 0.28, 0.43, 0.57, 0.71, 0.86, 1.0]
+    n1 = 3
+    n2 = n1 * 3
+
+proc eqnodes(n: int): seq[float] = 
+    result.newSeq(n)
+    for i in 0..n-1:
+        result[i] = a + i.float * (b - a) / (n.float - 1)
 
 proc values(f: proc(x: float): float, 
             x: varargs[float]): seq[float] = 
@@ -17,29 +20,41 @@ proc values(f: proc(x: float): float,
     for i in low(x)..high(x):
         result[i] = f(x[i])
 
-let rp1Values = f1.values(randomPoints1)
+# n1 equidistant nodes
+let 
+    inodes1x = eqnodes(n1)
+    inodes1y = f1.values(inodes1x)
+
+# Write table of nodes
 stdout.write("|")
-for p in randomPoints1:
-    stdout.write (formatFloat(f = p, precision = 2), "\t|")
+for p in inodes1x:
+    stdout.write (p.formatFloat(precision = 2), "\t|")
 stdout.write("\n|")
-for p in rp1Values:
-    stdout.write(formatFloat(f = p, precision = 4), "\t|")
+for p in inodes1y:
+    stdout.write(p.formatFloat(precision = 4), "\t|")
 stdout.write("\n\n")
 
-let res1 = interpolate(randomPoints1, rp1Values)
+let res1 = interpolate(inodes1x, inodes1y)
 
-var checkPoints: seq[float]
-checkPoints = @[]
-const cpCount = 100
-var tp = a
-for i in 0..cpCount:
-    checkPoints.add(tp)
-    tp = tp + (b - a) / cpCount.toFloat
-let f1Vals = f1.values(checkPoints)
-let res1Vals = res1.values(checkPoints)
+# n2 equidistant nodes
+let 
+    inodes2x = eqnodes(n2)
+    inodes2y = f1.values(inodes2x)
 
+# Write table of nodes
+stdout.write("|")
+for p in inodes2x:
+    stdout.write (p.formatFloat(precision = 2), "\t|")
+stdout.write("\n|")
+for p in inodes2y:
+    stdout.write(p.formatFloat(precision = 4), "\t|")
+stdout.write("\n\n")
+
+let res2 = interpolate(inodes2x, inodes2y)
+
+#
 # Graphics
-
+#
 const
     width = 600
     height = 800
@@ -48,17 +63,28 @@ surf.fillSurface(colWhite)
 
 const
     xoffset = 1.0
-    yoffset = 1.0
+    yoffset = -1.0
+    pointsForPlotting = 600
+
 let
-    scale = width / (checkPoints[checkPoints.high] - checkPoints[checkPoints.low])
+    checkPoints = eqnodes(pointsForPlotting)
+    scale = (width / (checkPoints[checkPoints.high] - checkPoints[checkPoints.low])).float
+    f1Vals = f1.values(checkPoints)
+    res1Vals = res1.values(checkPoints)
+    res2Vals = res2.values(checkPoints)
+
+proc convertCoords(x, y: float): TPoint = 
+    result.x = ((x + xoffset) * scale).int
+    result.y = (-(y + yoffset) * scale + height).int
 
 # Axis
 surf.drawLine(((xoffset * scale).int, 0), ((xoffset * scale).int, height), colDarkGray)
-surf.drawLine((0, (yoffset * scale + height).int), (width, (yoffset * scale + height).int), colDarkGray)
+surf.drawLine((0, (-yoffset * scale + height).int), (width, (-yoffset * scale + height).int), colDarkGray)
 
-for i in 1..cpCount:
-    surf.drawLine((((checkPoints[i-1] + xoffset) * scale).int, ((yoffset - f1Vals[i-1]) * scale + height).int), (((checkPoints[i] + xoffset) * scale).int, ((yoffset - f1Vals[i]) * scale + height).int), colBlue)
-    surf.drawLine((((checkPoints[i-1] + xoffset) * scale).int, ((yoffset - res1Vals[i-1]) * scale + height).int), (((checkPoints[i] + xoffset) * scale).int, ((yoffset - res1Vals[i]) * scale + height).int), colRed)
+for i in 1..pointsForPlotting-1:
+    surf.drawLine(convertCoords(checkPoints[i-1], f1Vals[i-1]), convertCoords(checkPoints[i], f1Vals[i]), colBlue)
+    surf.drawLine(convertCoords(checkPoints[i-1], res1Vals[i-1]), convertCoords(checkPoints[i], res1Vals[i]), colRed)
+    surf.drawLine(convertCoords(checkPoints[i-1], res2Vals[i-1]), convertCoords(checkPoints[i], res2Vals[i]), colGreen)
 
 withEvents(surf, event):
     var eventp = addr(event)
