@@ -145,8 +145,8 @@ for p in inodesx:
     stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
 stdout.write("\n|")
 for p in inodesy:
-    let tab = p.formatFloat(precision = 4).len < 7
-    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+    let tab = p.formatFloat(precision = 3).len < 7
+    stdout.write (p.formatFloat(precision = 3), if tab: "\t" else: "", "|")
 stdout.write("\n\n")
 
 let f2resoptn1 = interpolate(inodesx, inodesy)
@@ -170,8 +170,8 @@ for p in inodesx:
     stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
 stdout.write("\n|")
 for p in inodesy:
-    let tab = p.formatFloat(precision = 4).len < 7
-    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+    let tab = p.formatFloat(precision = 3).len < 7
+    stdout.write (p.formatFloat(precision = 3), if tab: "\t" else: "", "|")
 stdout.write("\n\n")
 
 let f2reseqn2 = interpolate(inodesx, inodesy)
@@ -187,8 +187,8 @@ for p in inodesx:
     stdout.write (p.formatFloat(precision = 2), if tab: "\t" else: "", "|")
 stdout.write("\n|")
 for p in inodesy:
-    let tab = p.formatFloat(precision = 4).len < 7
-    stdout.write (p.formatFloat(precision = 4), if tab: "\t" else: "", "|")
+    let tab = p.formatFloat(precision = 3).len < 7
+    stdout.write (p.formatFloat(precision = 3), if tab: "\t" else: "", "|")
 stdout.write("\n\n")
 
 let f2resoptn2 = interpolate(inodesx, inodesy)

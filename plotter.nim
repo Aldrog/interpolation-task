@@ -4,6 +4,8 @@ const
     # Window size
     width = 600
     height = 800
+    
+    lineColors = [ colRed, colGreen, colBlue ]
 var 
     # Plotting parameters
     a = -1.0
@@ -13,7 +15,7 @@ var
     pointsForPlotting = 600
     scale = (width / (b - a)).float
 
-proc convertCoords(x, y: float): TPoint = 
+proc convertCoords(x, y: float): graphics.TPoint = 
     result.x = ((x + xoffset) * scale).int
     result.y = (height - (y + yoffset) * scale).int
 
@@ -30,7 +32,6 @@ proc plot*(F: varargs[proc(x: float): float]) =
             fvalues[i][j] = F[i](points[j])
             
     yoffset = -min(fvalues[0]) + 0.5
-    echo yoffset
     
     var surf = newScreenSurface(width, height)
     surf.fillSurface(colWhite)
@@ -39,10 +40,11 @@ proc plot*(F: varargs[proc(x: float): float]) =
     surf.drawLine(((xoffset * scale).int, 0), ((xoffset * scale).int, height), colDarkGray)
     surf.drawLine((0, (-yoffset * scale + height).int), (width, (-yoffset * scale + height).int), colDarkGray)
     
-    for i in 1..pointsForPlotting-1:
-        surf.drawLine(convertCoords(points[i-1], fvalues[0][i-1]), convertCoords(points[i], fvalues[0][i]), colRed)
-        surf.drawLine(convertCoords(points[i-1], fvalues[1][i-1]), convertCoords(points[i], fvalues[1][i]), colGreen)
-        surf.drawLine(convertCoords(points[i-1], fvalues[2][i-1]), convertCoords(points[i], fvalues[2][i]), colBlue)
+    for i in low(F)..high(F):
+        for j in 1..pointsForPlotting-1:
+            surf.drawLine(convertCoords(points[j-1], fvalues[i][j-1]), convertCoords(points[j], fvalues[i][j]), lineColors[i %% lineColors.len])
+    
+    sdl.updateRect(surf.s, 0, 0, width, height)
     
     withEvents(surf, event):
         var eventp = addr(event)
