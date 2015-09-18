@@ -69,7 +69,7 @@ set1.newSeq(3)
 set1[0] = f1
 set1[1] = f1reseqn1
 set1[2] = f1resoptn1
-plot(set1)
+openPlot(set1)
 
 # n2 equidistant nodes
 inodesx = eqnodes(n2)
@@ -111,7 +111,7 @@ set2.newSeq(3)
 set2[0] = f1
 set2[1] = f1reseqn2
 set2[2] = f1resoptn2
-plot(set2)
+openPlot(set2)
 
 #
 # f2
@@ -157,7 +157,7 @@ set3.newSeq(3)
 set3[0] = f2
 set3[1] = f2reseqn1
 set3[2] = f2resoptn1
-plot(set3)
+openPlot(set3)
 
 # n2 equidistant nodes
 inodesx = eqnodes(n2)
@@ -199,4 +199,4 @@ set4.newSeq(3)
 set4[0] = f2
 set4[1] = f2reseqn2
 set4[2] = f2resoptn2
-plot(set4)
+openPlot(set4)
