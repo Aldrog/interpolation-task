@@ -5,6 +5,7 @@ const
     width = 600
     height = 800
     
+    zoom = 5
     lineColors = [ colRed, colGreen, colBlue ]
 var 
     # Plotting parameters
@@ -21,7 +22,7 @@ proc setDefaults() =
     b = 1.0
     xoffset = -a
     yoffset = -1.0
-    pointsForPlotting = 300
+    pointsForPlotting = 600
     scale = width.float / (b - a)
     zoomed = false
 
@@ -58,7 +59,7 @@ proc drawPlot(surf: graphics.PSurface, F: varargs[proc(x: float): float], assign
     
     sdl.updateRect(surf.s, 0, 0, width, height)
 
-proc openPlot*(F: varargs[proc(x: float): float]) = 
+proc showGraph*(F: varargs[proc(x: float): float]) = 
     setDefaults()
     
     var surf = newScreenSurface(width, height)
@@ -90,14 +91,16 @@ proc openPlot*(F: varargs[proc(x: float): float]) =
                 # Click
                 if not zoomed:
                     zoomed = true
-                    a = (3*a + b) / 4
-                    b = (a + 3*b) / 4
+                    a = ((zoom + 1)*a + (zoom - 1)*b) / (2 * zoom)
+                    b = ((zoom - 1)*a + (zoom + 1)*b) / (2 * zoom)
                     xoffset = -a
                     scale = width.float / (b - a)
                 else:
                     zoomed = false
-                    a = (3*a + b) * 4
-                    b = (a + 3*b) * 4
+                    #a = ((zoom + 1)*a + (-zoom + 1)*b) / 2
+                    #b = ((-zoom + 1)*a + (zoom + 1)*b) / 2
+                    a = -1.0
+                    b = 1.0
                     xoffset = -a
                     scale = width.float / (b - a)
                 surf.drawPlot(F)
@@ -112,7 +115,6 @@ proc openPlot*(F: varargs[proc(x: float): float]) =
                 var 
                     shiftX = x - prevX
                     shiftY = y - prevY
-                echo shiftX, " ", shiftY
                 a = a - shiftX.float / scale
                 b = b - shiftX.float / scale
                 xoffset = -a
