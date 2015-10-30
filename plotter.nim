@@ -3,9 +3,10 @@ import sdl, graphics, colors
 const
     # Window size
     width = 600
-    height = 800
+    height = 700
     
     zoom = 5
+    maxZoomDepth = 2
     lineColors = [ colRed, colGreen, colBlue ]
 var 
     # Plotting parameters
@@ -15,22 +16,22 @@ var
     yoffset: float
     pointsForPlotting: int
     scale: float
-    zoomed: bool
+    zoomDepth: int
 
 proc setDefaults() =
     a = -1.0
     b = 1.0
     xoffset = -a
     yoffset = -1.0
-    pointsForPlotting = 600
+    pointsForPlotting = width
     scale = width.float / (b - a)
-    zoomed = false
+    zoomDepth = 0
 
-proc convertCoords(x, y: float): graphics.TPoint = 
+proc convertCoords(x, y: float): graphics.Point =
     result.x = ((x + xoffset) * scale).int
     result.y = (height - (y + yoffset) * scale).int
 
-proc drawPlot(surf: graphics.PSurface, F: varargs[proc(x: float): float], assignyoffset: bool = false) = 
+proc drawPlot(surf: graphics.PSurface, F: varargs[proc(x: float): float], assignYOffset: bool = false) =
     var points: seq[float]
     points.newSeq(pointsForPlotting)
     for i in 0..pointsForPlotting-1:
@@ -42,8 +43,8 @@ proc drawPlot(surf: graphics.PSurface, F: varargs[proc(x: float): float], assign
         for j in 0..pointsForPlotting-1:
             fvalues[i][j] = F[i](points[j])
     
-    if assignyoffset: 
-        yoffset = -min(fvalues[0]) + 0.5
+    if assignYOffset:
+        yoffset = (((b - a)*height.float/width.float) - (max(fvalues[0]) + min(fvalues[0]))) / 2
     
     surf.fillSurface(colWhite)
 
@@ -59,11 +60,12 @@ proc drawPlot(surf: graphics.PSurface, F: varargs[proc(x: float): float], assign
     
     sdl.updateRect(surf.s, 0, 0, width, height)
 
-proc showGraph*(F: varargs[proc(x: float): float]) = 
+proc showGraph*(F: varargs[proc(x: float): float]) =
     setDefaults()
     
     var surf = newScreenSurface(width, height)
     surf.drawPlot(F, true)
+    surf.writeToBmp("result.bmp")
     
     var 
         prevX = -1
@@ -89,21 +91,24 @@ proc showGraph*(F: varargs[proc(x: float): float]) =
                 y = mbu.y.int
             if startX == x and startY == y:
                 # Click
-                if not zoomed:
-                    zoomed = true
-                    a = ((zoom + 1)*a + (zoom - 1)*b) / (2 * zoom)
-                    b = ((zoom - 1)*a + (zoom + 1)*b) / (2 * zoom)
+                if zoomDepth < maxZoomDepth:
+                    inc(zoomDepth)
+                    let 
+                        newA = ((zoom + 1)*a + (zoom - 1)*b) / (2 * zoom)
+                        newB = ((zoom - 1)*a + (zoom + 1)*b) / (2 * zoom)
+                    a = newA
+                    b = newB
                     xoffset = -a
                     scale = width.float / (b - a)
                 else:
-                    zoomed = false
+                    zoomDepth = 0
                     #a = ((zoom + 1)*a + (-zoom + 1)*b) / 2
                     #b = ((-zoom + 1)*a + (zoom + 1)*b) / 2
                     a = -1.0
                     b = 1.0
                     xoffset = -a
                     scale = width.float / (b - a)
-                surf.drawPlot(F)
+                surf.drawPlot(F, true)
             prevX = -1
             prevY = -1
         of sdl.MOUSEMOTION:

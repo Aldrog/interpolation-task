@@ -3,23 +3,23 @@ import strutils
 import functions, interpolation, plotter
 
 const 
-    a = -1.0
-    b = 1.0
+    a = 1.0
+    b = -1.0
     n1 = 3
     n2 = n1 * 3
 
-proc eqnodes(n: int): seq[float] = 
+proc eqnodes(n: int): seq[float] =
     result.newSeq(n)
     for i in 0..n-1:
         result[i] = a + i.float * (b - a) / (n.float - 1)
 
-proc optimalnodes(n: int): seq[float] = 
+proc optimalnodes(n: int): seq[float] =
     result.newSeq(n)
     for i in 0..n-1:
         result[i] = 0.5 * ((b - a) * cos(PI * (2 * i + 1).float/(2 * n).float) + (b + a))
 
-proc values(f: proc(x: float): float, 
-            x: varargs[float]): seq[float] = 
+proc values(f: proc(x: float): float,
+            x: varargs[float]): seq[float] =
     result.newSeq(x.len)
     for i in low(x)..high(x):
         result[i] = f(x[i])

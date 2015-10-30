@@ -10,6 +10,17 @@ On [-1; +1] interval using Lagrange polynomials.
 2. Repeat the first task with number of nodes multiplied by 3.
 3. Do the same work for function multiplied by |x| (`f(x) = |x| (x + 3) cos x`).
 
-Result:
+#Result
+![alt tag](https://raw.githubusercontent.com/Aldrog/interpolation-task/master/result.bmp)  
+Red - f(x)  
+Green - interpolation for equidistant nodes  
+Blue - interpolation for Chebishev nodes
 
-![alt tag](https://raw.githubusercontent.com/Aldrog/interpolation-task/master/screenshot.png)
+#Requirements
+For compiling this you will need the following:
+* Nim compiler version 0.11 or higher
+* graphics and sdl1 modules for graph plotter
+```
+nimble install graphics sdl1
+```
+* SDL development headers
